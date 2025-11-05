@@ -1,13 +1,14 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 import {
   Database,
   Folder,
   ListOrdered,
   Pizza,
 } from "lucide-react"
-import Link from "next/link"
 
 import {
   Sidebar,
@@ -46,6 +47,8 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
+
   return (
     <Sidebar collapsible="icon" {...props}>
       {/* Cabeçalho */}
@@ -67,16 +70,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.link}>
-                      <item.icon className="size-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {data.navMain.map((item) => {
+                const isActive = pathname === item.link
+
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      className={`
+                        ${isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
+                      `}
+                    >
+                      <Link href={item.link}>
+                        <item.icon className="size-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -89,7 +101,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </p>
       </SidebarFooter>
 
-      {/* Barra de controle da sidebar */}
+      {/* Barra lateral retrátil */}
       <SidebarRail />
     </Sidebar>
   )
