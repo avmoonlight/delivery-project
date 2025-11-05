@@ -1,108 +1,82 @@
-"use client"
+'use client'
 
 import * as React from "react"
-import { usePathname } from "next/navigation"
 import Link from "next/link"
 import {
-  Database,
-  Folder,
-  ListOrdered,
-  Pizza,
-} from "lucide-react"
+  IconDatabase,
+  IconFolder,
+  IconListDetails,
+} from "@tabler/icons-react"
+import { Pizza } from "lucide-react"
 
 import {
   Sidebar,
-  SidebarHeader,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
-  SidebarRail,
 } from "@/components/ui/sidebar"
 
-// ==========================================
-// DADOS DO MENU
-// ==========================================
 const data = {
   navMain: [
     {
       name: "Produtos",
       link: "/painel/produtos" as const,
-      icon: Database,
+      icon: IconDatabase,
     },
     {
       name: "Categorias",
       link: "/painel/categorias" as const,
-      icon: Folder,
+      icon: IconFolder,
     },
     {
       name: "Pedidos",
       link: "/painel/pedidos" as const,
-      icon: ListOrdered,
+      icon: IconListDetails,
     },
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const pathname = usePathname()
-
   return (
-    <Sidebar collapsible="icon" {...props}>
-      {/* Cabeçalho */}
+    <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
               <Link href="/painel">
-                <Pizza className="size-5" />
-                <span className="font-semibold">Delivery</span>
+                <Pizza className="!size-5" />
+                <span className="text-base font-semibold">Delivery</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* Conteúdo principal */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navMain.map((item) => {
-                const isActive = pathname === item.link
-
-                return (
-                  <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton
-                      asChild
-                      className={`
-                        ${isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
-                      `}
-                    >
-                      <Link href={item.link}>
-                        <item.icon className="size-4" />
-                        <span>{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
+              {data.navMain.map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.link}>
+                      <item.icon />
+                      <span>{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      {/* Rodapé opcional */}
-      <SidebarFooter>
-        <p className="text-xs text-muted-foreground px-2">
-          © 2025 Delivery App
-        </p>
-      </SidebarFooter>
-
-      {/* Barra lateral retrátil */}
-      <SidebarRail />
     </Sidebar>
   )
 }
