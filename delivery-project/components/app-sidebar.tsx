@@ -1,62 +1,68 @@
-'use client'
+"use client"
 
 import * as React from "react"
 import {
-  IconDatabase,
-  IconFolder,
-  IconListDetails,
-} from "@tabler/icons-react"
+  Database,
+  Folder,
+  ListOrdered,
+  Pizza,
+} from "lucide-react"
+import Link from "next/link"
+
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
+  SidebarRail,
 } from "@/components/ui/sidebar"
-import { Pizza } from "lucide-react"
-import Link from "next/link"
 
+// ==========================================
+// DADOS DO MENU
+// ==========================================
 const data = {
   navMain: [
     {
       name: "Produtos",
       link: "/painel/produtos" as const,
-      icon: IconDatabase,
+      icon: Database,
     },
     {
       name: "Categorias",
       link: "/painel/categorias" as const,
-      icon: IconFolder,
+      icon: Folder,
     },
     {
       name: "Pedidos",
       link: "/painel/pedidos" as const,
-      icon: IconListDetails,
+      icon: ListOrdered,
     },
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
+      {/* Cabeçalho */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
+            <SidebarMenuButton asChild>
               <Link href="/painel">
-                <Pizza className="!size-5" />
-                <span className="text-base font-semibold">Delivery</span>
+                <Pizza className="size-5" />
+                <span className="font-semibold">Delivery</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
+      {/* Conteúdo principal */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -65,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild>
                     <Link href={item.link}>
-                      <item.icon />
+                      <item.icon className="size-4" />
                       <span>{item.name}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -75,6 +81,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Rodapé opcional */}
+      <SidebarFooter>
+        <p className="text-xs text-muted-foreground px-2">
+          © 2025 Delivery App
+        </p>
+      </SidebarFooter>
+
+      {/* Barra de controle da sidebar */}
+      <SidebarRail />
     </Sidebar>
   )
 }
