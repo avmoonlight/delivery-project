@@ -12,14 +12,16 @@ const pedidoSchema = z.object({
 })
 
 export async function criarPedido(formData: FormData) {
-  // RECEBE "id1,id2,id3"
   const produtosString = formData.get("produtos") as string
   const produtos = produtosString.split(",")
 
   const data = { ...Object.fromEntries(formData), produtos }
   const result = pedidoSchema.safeParse(data)
 
-  if (!result.success) return { error: result.error.message }
+  if (!result.success) {
+    const firstError = result.error.issues[0]?.message || 'Erro de validação'
+    return { error: firstError }
+  }
 
   try {
     await prisma.pedidos.create({
@@ -29,14 +31,15 @@ export async function criarPedido(formData: FormData) {
         telefone: result.data.telefone,
         produtos: {
           create: result.data.produtos.map((produtoId) => ({
-            produto: { connect: { id: produtoId } }
+            produtoId: produtoId
           })),
         },
       },
     })
     revalidatePath('/painel/pedidos')
     return { success: true }
-  } catch {
+  } catch (error) {
+    console.error('Erro ao criar pedido:', error)
     return { error: 'Erro ao criar pedido' }
   }
 }
@@ -48,9 +51,16 @@ export async function editarPedido(id: string, formData: FormData) {
   const data = { ...Object.fromEntries(formData), produtos }
   const result = pedidoSchema.safeParse(data)
 
-  if (!result.success) return { error: result.error.message }
+  if (!result.success) {
+    const firstError = result.error.issues[0]?.message || 'Erro de validação'
+    return { error: firstError }
+  }
 
   try {
+    await prisma.pedidosProdutos.deleteMany({
+      where: { pedidoId: id }
+    })
+
     await prisma.pedidos.update({
       where: { id },
       data: {
@@ -58,28 +68,33 @@ export async function editarPedido(id: string, formData: FormData) {
         endereco: result.data.endereco,
         telefone: result.data.telefone,
         produtos: {
-          deleteMany: {}, // apaga todos os vínculos antigos
           create: result.data.produtos.map((produtoId) => ({
-            produto: { connect: { id: produtoId } }
+            produtoId: produtoId
           })),
         },
       },
     })
     revalidatePath('/painel/pedidos')
     return { success: true }
-  } catch {
+  } catch (error) {
+    console.error('Erro ao atualizar pedido:', error)
     return { error: 'Erro ao atualizar pedido' }
   }
 }
 
 export async function excluirPedido(id: string) {
   try {
+    await prisma.pedidosProdutos.deleteMany({
+      where: { pedidoId: id }
+    })
+
     await prisma.pedidos.delete({
       where: { id },
     })
     revalidatePath('/painel/pedidos')
     return { success: true }
-  } catch {
+  } catch (error) {
+    console.error('Erro ao excluir pedido:', error)
     return { error: 'Erro ao excluir pedido' }
   }
 }
