@@ -79,14 +79,6 @@ model Categorias {
   produtos  Produtos[]
 }
 
-model Pedidos {
-  id         String     @id @default(uuid())
-  nome       String
-  endereco   String
-  telefone   String
-  produtos   Produtos[] @relation("PedidosProdutos")
-}
-
 model Produtos {
   id           String     @id @default(uuid())
   nome         String
@@ -94,8 +86,12 @@ model Produtos {
   descricao    String?
   categoriaId  String
   categoria    Categorias @relation(fields: [categoriaId], references: [id])
-
-  pedidos      Pedidos[]  @relation("PedidosProdutos")
 }
-
+model Pedidos {
+  id         String     @id @default(uuid())
+  nome       String
+  endereco   String
+  telefone   String
+  produtos   Produtos[]
+}
 
