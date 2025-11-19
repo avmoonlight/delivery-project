@@ -57,28 +57,29 @@ export function MultiSelectCombobox({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandList>
-            <CommandGroup>
-              {items.map(item => (
-                <CommandItem
-                  key={item.id}
-                  onSelect={() => toggleItem(item.id)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value.includes(item.id) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {item.nome}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
+      <PopoverContent className="w-full p-0 z-[9999]">
+  <Command>
+    <CommandList>
+      <CommandGroup>
+        {items.map(item => (
+          <CommandItem
+            key={item.id}
+            onSelect={() => toggleItem(item.id)}
+          >
+            <Check
+              className={cn(
+                "mr-2 h-4 w-4",
+                value.includes(item.id) ? "opacity-100" : "opacity-0"
+              )}
+            />
+            {item.nome}
+          </CommandItem>
+        ))}
+      </CommandGroup>
+    </CommandList>
+  </Command>
+</PopoverContent>
+
     </Popover>
   )
 }
