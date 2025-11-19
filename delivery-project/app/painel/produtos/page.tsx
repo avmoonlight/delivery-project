@@ -43,7 +43,7 @@ export default async function ProdutosPage() {
               </CardContent>
               <CardFooter className="flex justify-end gap-2">
                 <EditProduto produto={produto} categorias={categorias} />
-                <DeleteProduto produto={produto} categorias={[]} />
+                <DeleteProduto produto={produto} categorias={categorias} />
               </CardFooter>
             </Card>
           ))}
