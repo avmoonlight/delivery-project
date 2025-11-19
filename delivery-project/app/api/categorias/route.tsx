@@ -3,18 +3,15 @@ import prisma from "@/lib/prisma-client"
 
 export async function GET() {
   try {
-    const produtos = await prisma.produtos.findMany({
+    const categorias = await prisma.categorias.findMany({
       orderBy: { nome: 'asc' },
-      include: {
-        categoria: true,
-      },
     })
 
-    return NextResponse.json(produtos)
+    return NextResponse.json(categorias)
   } catch (error) {
-    console.error('Erro ao buscar produtos:', error)
+    console.error('Erro ao buscar categorias:', error)
     return NextResponse.json(
-      { error: 'Erro ao buscar produtos' },
+      { error: 'Erro ao buscar categorias' },
       { status: 500 }
     )
   }
