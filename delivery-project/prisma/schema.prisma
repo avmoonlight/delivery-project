@@ -80,18 +80,28 @@ model Categorias {
 }
 
 model Produtos {
-  id           String     @id @default(uuid())
-  nome         String
-  preco        Float
-  descricao    String?
-  categoriaId  String
-  categoria    Categorias @relation(fields: [categoriaId], references: [id])
-}
-model Pedidos {
-  id         String     @id @default(uuid())
-  nome       String
-  endereco   String
-  telefone   String
-  produtos   Produtos[]
+  id          String            @id @default(uuid())
+  nome        String
+  preco       Float
+  descricao   String?
+  categoriaId String
+  categoria   Categorias        @relation(fields: [categoriaId], references: [id])
+  pedidos     PedidosProdutos[]   // <<--- IMPORTANTE!!!
 }
 
+model Pedidos {
+  id        String            @id @default(uuid())
+  nome      String
+  endereco  String
+  telefone  String
+  produtos  PedidosProdutos[]
+}
+
+model PedidosProdutos {
+  id        String   @id @default(uuid())
+  pedidoId  String
+  produtoId String
+
+  pedido    Pedidos  @relation(fields: [pedidoId], references: [id])
+  produto   Produtos @relation(fields: [produtoId], references: [id])
+}
