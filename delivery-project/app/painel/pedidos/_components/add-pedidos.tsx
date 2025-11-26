@@ -35,20 +35,25 @@ export default function AddPedido() {
   const [produtos, setProdutos] = useState<{ id: string; nome: string }[]>([])
   const [selectedProdutos, setSelectedProdutos] = useState<string[]>([])
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError,
-    reset,
-  } = useForm<PedidoForm>({
+  const { register, handleSubmit, formState: { errors }, setValue, trigger, reset } = useForm<PedidoForm>({
     resolver: zodResolver(pedidoSchema),
   })
 
+  // Registrar campo produtos no RHF
+  useEffect(() => {
+    register('produtos')
+  }, [register])
+
+  // Atualizar o RHF quando o usuário seleciona produtos
+  useEffect(() => {
+    setValue('produtos', selectedProdutos)
+    trigger('produtos') // validação instantânea
+  }, [selectedProdutos, setValue, trigger])
+
   useEffect(() => {
     fetch('/api/produtos')
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         const formatted = data.map((p: any) => ({
           id: p.id,
           nome: `${p.nome} — R$ ${Number(p.preco || 0).toFixed(2)}`
@@ -58,8 +63,6 @@ export default function AddPedido() {
   }, [])
 
   function onSubmit(data: PedidoForm) {
-    data.produtos = selectedProdutos
-
     startTransition(async () => {
       const formData = new FormData()
       formData.append('nome', data.nome)
@@ -71,6 +74,7 @@ export default function AddPedido() {
       const result = await criarPedido(formData)
 
       if (result.error) {
+        // Se houver erro do servidor, pode exibir global ou mapear para campos específicos
         alert(result.error)
         return
       }
@@ -101,40 +105,27 @@ export default function AddPedido() {
             <div>
               <Label htmlFor="nome">Nome do Cliente</Label>
               <Input id="nome" {...register('nome')} disabled={isPending} />
-              {errors.nome && (
-                <p className="text-sm text-red-500">{errors.nome.message}</p>
-              )}
+              {errors.nome && <p className="text-sm text-red-500">{errors.nome.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="endereco">Endereço (Rua)</Label>
                 <Input id="endereco" {...register('endereco')} disabled={isPending} />
-                {errors.endereco && (
-                  <p className="text-sm text-red-500">{errors.endereco.message}</p>
-                )}
+                {errors.endereco && <p className="text-sm text-red-500">{errors.endereco.message}</p>}
               </div>
 
               <div>
                 <Label htmlFor="numero">Número</Label>
-                <Input
-                  id="numero"
-                  type="number"
-                  {...register('numero')}
-                  disabled={isPending}
-                />
-                {errors.numero && (
-                  <p className="text-sm text-red-500">{errors.numero.message}</p>
-                )}
+                <Input id="numero" type="number" {...register('numero')} disabled={isPending} />
+                {errors.numero && <p className="text-sm text-red-500">{errors.numero.message}</p>}
               </div>
             </div>
 
             <div>
               <Label htmlFor="telefone">Telefone</Label>
               <Input id="telefone" {...register('telefone')} disabled={isPending} />
-              {errors.telefone && (
-                <p className="text-sm text-red-500">{errors.telefone.message}</p>
-              )}
+              {errors.telefone && <p className="text-sm text-red-500">{errors.telefone.message}</p>}
             </div>
 
             <div>
@@ -145,9 +136,7 @@ export default function AddPedido() {
                 onChange={setSelectedProdutos}
                 placeholder="Selecione os produtos"
               />
-              {errors.produtos && (
-                <p className="text-sm text-red-500">{errors.produtos.message}</p>
-              )}
+              {errors.produtos && <p className="text-sm text-red-500">{errors.produtos.message}</p>}
             </div>
           </div>
 
