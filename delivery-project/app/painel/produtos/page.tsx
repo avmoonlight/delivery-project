@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma-client'
 import AddProduto from './_components/add-produto'
 import EditProduto from './_components/edit-produto'
-import DeleteProduto from './_components/edit-produto'
+import DeleteProduto from './_components/delete-produto'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function ProdutosPage() {
@@ -43,7 +43,7 @@ export default async function ProdutosPage() {
               </CardContent>
               <CardFooter className="flex justify-end gap-2">
                 <EditProduto produto={produto} categorias={categorias} />
-                <DeleteProduto produto={produto} categorias={categorias} />
+                <DeleteProduto produto={produto} />
               </CardFooter>
             </Card>
           ))}
