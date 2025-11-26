@@ -21,7 +21,6 @@ export async function criarPedido(formData: FormData) {
   const data = { ...Object.fromEntries(formData), produtos }
   const result = pedidoSchema.safeParse(data)
 
-  // ❌ Caso endereço OU número sejam inválidos → retorna erro para exibir no pop-up
   if (!result.success) {
     return { error: result.error.issues[0].message }
   }
