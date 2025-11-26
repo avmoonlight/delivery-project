@@ -27,7 +27,6 @@ export default function AddPedido() {
     fetch('/api/produtos')
       .then((res) => res.json())
       .then((data) => {
-        // Ajuste correto para o formato esperado pelo combobox
         const formatted = data.map((p: any) => ({
           id: p.id,
           nome: `${p.nome} — R$ ${Number(p.preco || 0).toFixed(2)}`
@@ -36,19 +35,23 @@ export default function AddPedido() {
       })
   }, [])
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault() // ❗ Impede envio automático — AGORA funciona no cliente
+
+    const formData = new FormData(e.currentTarget)
     formData.append("produtos", selectedProdutos.join(","))
 
     startTransition(async () => {
       const result = await criarPedido(formData)
 
       if (result.error) {
-        toast.error(result.error)
-      } else {
-        toast.success("Pedido criado com sucesso!")
-        setOpen(false)
-        setSelectedProdutos([])
+        toast.error(result.error) // 🔥 AGORA O POP-UP APARECE
+        return
       }
+
+      toast.success("Pedido criado com sucesso!")
+      setOpen(false)
+      setSelectedProdutos([])
     })
   }
 
@@ -66,16 +69,32 @@ export default function AddPedido() {
           </DialogDescription>
         </DialogHeader>
 
-        <form action={handleSubmit}>
+        {/* USANDO onSubmit (NÃO action) */}
+        <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+
             <div>
               <Label htmlFor="nome">Nome do Cliente</Label>
               <Input id="nome" name="nome" required disabled={isPending} />
             </div>
 
-            <div>
-              <Label htmlFor="endereco">Endereço</Label>
-              <Input id="endereco" name="endereco" required disabled={isPending} />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="endereco">Endereço (Rua)</Label>
+                <Input id="endereco" name="endereco" required disabled={isPending} />
+              </div>
+
+              <div>
+                <Label htmlFor="numero">Número</Label>
+                <Input
+                  id="numero"
+                  name="numero"
+                  required
+                  disabled={isPending}
+                  type="number"
+                  min="1"
+                />
+              </div>
             </div>
 
             <div>
@@ -85,7 +104,6 @@ export default function AddPedido() {
 
             <div>
               <Label>Produtos</Label>
-
               <MultiSelectCombobox
                 items={produtos}
                 value={selectedProdutos}
