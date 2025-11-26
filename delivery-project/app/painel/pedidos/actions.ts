@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma-client"
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
-// VALIDAÇÃO DO FORMULÁRIO
 const pedidoSchema = z.object({
   nome: z.string().min(2, 'Nome obrigatório'),
   endereco: z.string().min(3, 'Endereço inválido'),

@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,14 +17,33 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { criarPedido } from '../actions'
-import { toast } from 'sonner'
 import { MultiSelectCombobox } from "@/components/ui/multi-select-combobox"
+
+const pedidoSchema = z.object({
+  nome: z.string().min(2, 'Nome obrigatório'),
+  endereco: z.string().min(3, 'Endereço inválido'),
+  numero: z.string().regex(/^[0-9]+$/, 'Número inválido'),
+  telefone: z.string().min(9, 'Telefone inválido'),
+  produtos: z.array(z.string()).min(1, 'Selecione ao menos um produto'),
+})
+
+type PedidoForm = z.infer<typeof pedidoSchema>
 
 export default function AddPedido() {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [produtos, setProdutos] = useState<{ id: string; nome: string }[]>([])
   const [selectedProdutos, setSelectedProdutos] = useState<string[]>([])
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+    reset,
+  } = useForm<PedidoForm>({
+    resolver: zodResolver(pedidoSchema),
+  })
 
   useEffect(() => {
     fetch('/api/produtos')
@@ -35,23 +57,27 @@ export default function AddPedido() {
       })
   }, [])
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault() // ❗ Impede envio automático — AGORA funciona no cliente
-
-    const formData = new FormData(e.currentTarget)
-    formData.append("produtos", selectedProdutos.join(","))
+  function onSubmit(data: PedidoForm) {
+    data.produtos = selectedProdutos
 
     startTransition(async () => {
+      const formData = new FormData()
+      formData.append('nome', data.nome)
+      formData.append('endereco', data.endereco)
+      formData.append('numero', data.numero)
+      formData.append('telefone', data.telefone)
+      formData.append('produtos', data.produtos.join(','))
+
       const result = await criarPedido(formData)
 
       if (result.error) {
-        toast.error(result.error) // 🔥 AGORA O POP-UP APARECE
+        alert(result.error)
         return
       }
 
-      toast.success("Pedido criado com sucesso!")
-      setOpen(false)
+      reset()
       setSelectedProdutos([])
+      setOpen(false)
     })
   }
 
@@ -69,37 +95,46 @@ export default function AddPedido() {
           </DialogDescription>
         </DialogHeader>
 
-        {/* USANDO onSubmit (NÃO action) */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4 py-4">
 
             <div>
               <Label htmlFor="nome">Nome do Cliente</Label>
-              <Input id="nome" name="nome" required disabled={isPending} />
+              <Input id="nome" {...register('nome')} disabled={isPending} />
+              {errors.nome && (
+                <p className="text-sm text-red-500">{errors.nome.message}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="endereco">Endereço (Rua)</Label>
-                <Input id="endereco" name="endereco" required disabled={isPending} />
+                <Input id="endereco" {...register('endereco')} disabled={isPending} />
+                {errors.endereco && (
+                  <p className="text-sm text-red-500">{errors.endereco.message}</p>
+                )}
               </div>
 
               <div>
                 <Label htmlFor="numero">Número</Label>
                 <Input
                   id="numero"
-                  name="numero"
-                  required
-                  disabled={isPending}
                   type="number"
-                  min="1"
+                  {...register('numero')}
+                  disabled={isPending}
                 />
+                {errors.numero && (
+                  <p className="text-sm text-red-500">{errors.numero.message}</p>
+                )}
               </div>
             </div>
 
             <div>
               <Label htmlFor="telefone">Telefone</Label>
-              <Input id="telefone" name="telefone" required disabled={isPending} />
+              <Input id="telefone" {...register('telefone')} disabled={isPending} />
+              {errors.telefone && (
+                <p className="text-sm text-red-500">{errors.telefone.message}</p>
+              )}
             </div>
 
             <div>
@@ -110,6 +145,9 @@ export default function AddPedido() {
                 onChange={setSelectedProdutos}
                 placeholder="Selecione os produtos"
               />
+              {errors.produtos && (
+                <p className="text-sm text-red-500">{errors.produtos.message}</p>
+              )}
             </div>
           </div>
 
